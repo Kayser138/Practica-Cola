@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 typedef struct nodo_t {
-    void** datos;
+    void* dato;
     struct nodo_t* siguiente;
 } nodo_t;
 
@@ -12,7 +12,7 @@ struct cola{
 };
 
 cola_t* cola_crear (void){
-    cola_t *cola = malloc (sizeof(void*));
+    cola_t *cola = malloc (sizeof(cola_t));
     cola->primerNodo = NULL;
     return cola;
 }
@@ -32,7 +32,7 @@ void cola_destruir (cola_t *cola, void destruir_dato(void*)){
 
         if (destruir_dato != NULL){
             do {
-                destruir_dato (&nodo_actual->datos);
+                destruir_dato (&nodo_actual->dato);
                 nodo_actual = nodo_siguiente;
                 if(nodo_actual != NULL){
                     nodo_siguiente = nodo_siguiente->siguiente;
@@ -55,34 +55,35 @@ bool cola_encolar (cola_t *cola, void* valor){
     if (cola_esta_vacia(cola)){
         nodo_t* nuevoNodo = malloc(sizeof(nodo_t));
         if (nuevoNodo == NULL) return false;
-        nuevoNodo->datos= valor;
+        nuevoNodo->dato= valor;
         nuevoNodo->siguiente= NULL;
-        printf("El nuevo nodo se creo, y tiene de valor: %d \n", (int)&nuevoNodo->datos);
+        printf("El nuevo nodo se creo, y tiene de valor: %d \n", *(int*)nuevoNodo->dato);
         cola->primerNodo = nuevoNodo;
         return true;
     }//Ahora vemos que hacer si tenemos otros elementos
-    nodo_t *nodoAux = malloc(sizeof(nodo_t));
-    if (nodoAux == NULL) return false; //No tengo memoria para encolar    
-    nodoAux = cola->primerNodo;
-    while (nodoAux != NULL){
+    nodo_t *nodoAux = cola->primerNodo;
+
+    while (nodoAux->siguiente != NULL){
         nodoAux = nodoAux->siguiente;
     }
+
     nodo_t* nuevoNodo = malloc(sizeof(nodo_t));
     if (nuevoNodo == NULL) return false;
-    nuevoNodo->datos= valor;
+    
+    nuevoNodo->dato = valor;
     nuevoNodo->siguiente= NULL;
-    nodoAux->siguiente= nuevoNodo->siguiente;
-    free (nodoAux);
+    nodoAux->siguiente= nuevoNodo;
+    printf("El nuevo nodo se creo, y tiene de valor: %d \n", *(int*)nuevoNodo->dato);
     return true;
 }
 
 void* cola_ver_primero(const cola_t *cola){
     if (cola_esta_vacia(&*cola)) return NULL;
-    return &cola->primerNodo->datos;
+    return &cola->primerNodo->dato;
 }
 
-void* cola_desencolar(cola_t *cola){
-    if (cola_esta_vacia(&*cola)) return NULL;
+void* cola_desencolar(cola_t* cola){
+    if (cola_esta_vacia(cola)) return NULL;
     nodo_t *primer_nodo = cola->primerNodo;
     nodo_t *nodoAux = cola->primerNodo->siguiente;
     
@@ -92,5 +93,6 @@ void* cola_desencolar(cola_t *cola){
     cola->primerNodo = nodoAux;
 
     //devolvemos el valor del nodo
-    return primer_nodo->datos;
+    printf("Se desencolo el valor: %d \n", *(int*)primer_nodo->dato);
+    return primer_nodo->dato;
 }
